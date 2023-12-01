@@ -17,7 +17,16 @@ const clearBtn = document.getElementById('clear');
 const itemFilter = document.getElementById('filter');
 
 //functions
-function addItem(e) {
+
+function displayItems() {
+  const itemsFromStorage = getItemsFromStorage();
+  itemsFromStorage.forEach((item) => addItemToDom(item));
+
+  //state check
+  checkUI();
+}
+
+function onAddItemSubmit(e) {
   e.preventDefault();
   const newItem = itemInput.value;
 
@@ -26,20 +35,27 @@ function addItem(e) {
     alert('please add an item');
     return;
   }
+  // create item dom element
+  addItemToDom(newItem);
 
+  //add item to local storage
+  addItemToStorage(newItem);
+
+  //check the state
+  checkUI();
+
+  itemInput.value = '';
+}
+
+function addItemToDom(item) {
   //create list item
   const li = document.createElement('li');
-  li.appendChild(document.createTextNode(newItem));
+  li.appendChild(document.createTextNode(item));
   // create button
   const button = createButton('remove-item btn-link text-red');
   li.appendChild(button);
 
   itemList.appendChild(li);
-
-  itemInput.value = '';
-
-  //check the state
-  checkUI();
 }
 
 function createButton(classes) {
@@ -54,6 +70,31 @@ function createIcon(classes) {
   const icon = document.createElement('i');
   icon.className = classes;
   return icon;
+}
+
+function addItemToStorage(item) {
+  // creating vairable
+  const itemsFromStorage = getItemsFromStorage();
+
+  // add new item to array
+  itemsFromStorage.push(item);
+
+  //convert to JSON string and set to local storage
+  localStorage.setItem('items', JSON.stringify(itemsFromStorage));
+}
+
+function getItemsFromStorage() {
+  let itemsFromStorage;
+
+  //checking to see if there are items in storage
+  if (localStorage.getItem('items') === null) {
+    // no items -> empty array
+    itemsFromStorage = [];
+  } else {
+    itemsFromStorage = JSON.parse(localStorage.getItem('items')); // if not empty array of whatever is in storage
+  }
+
+  return itemsFromStorage;
 }
 
 function removeItem(e) {
@@ -107,11 +148,19 @@ function checkUI() {
     itemFilter.style.display = 'block';
   }
 }
-//Event listeners
-itemForm.addEventListener('submit', addItem);
-itemList.addEventListener('click', removeItem);
-clearBtn.addEventListener('click', clearItems);
-itemFilter.addEventListener('input', filterItems);
 
-// check the state
-checkUI();
+//init function -> initialize app
+
+function init() {
+  //Event listeners
+  itemForm.addEventListener('submit', onAddItemSubmit);
+  itemList.addEventListener('click', removeItem);
+  clearBtn.addEventListener('click', clearItems);
+  itemFilter.addEventListener('input', filterItems);
+  document.addEventListener('DOMContentLoaded', displayItems);
+
+  // check the state
+  checkUI();
+}
+
+init();
