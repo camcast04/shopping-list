@@ -15,6 +15,8 @@ const itemInput = document.getElementById('item-input');
 const itemList = document.getElementById('item-list');
 const clearBtn = document.getElementById('clear');
 const itemFilter = document.getElementById('filter');
+const formBtn = itemForm.querySelector('button');
+let isEditMode = false;
 
 //functions
 
@@ -28,19 +30,34 @@ function displayItems() {
 
 function onAddItemSubmit(e) {
   e.preventDefault();
-  const newItem = itemInput.value;
+  const stringInput = itemInput.value.toLowerCase().trim();
+  const newItem = stringInput.charAt(0).toUpperCase() + stringInput.slice(1);
 
   //validate input
   if (newItem === '') {
     alert('please add an item');
     return;
   }
+
+  // check for edit mode
+  if (isEditMode) {
+    const itemToEdit = itemList.querySelector('.edit-mode');
+
+    removeItemFromStorage(itemToEdit.textContent);
+    itemToEdit.classList.remove('edit-mode');
+    itemToEdit.remove();
+    isEditMode = false;
+  } else {
+    if (checkIfItemExists(newItem)) {
+      alert('That item already exists!');
+      return;
+    }
+  }
+
   // create item dom element
   addItemToDom(newItem);
-
   //add item to local storage
   addItemToStorage(newItem);
-
   //check the state
   checkUI();
 
@@ -75,10 +92,8 @@ function createIcon(classes) {
 function addItemToStorage(item) {
   // creating vairable
   const itemsFromStorage = getItemsFromStorage();
-
   // add new item to array
   itemsFromStorage.push(item);
-
   //convert to JSON string and set to local storage
   localStorage.setItem('items', JSON.stringify(itemsFromStorage));
 }
@@ -98,9 +113,30 @@ function getItemsFromStorage() {
 }
 
 function onClickItem(e) {
+  // this is a handler that depending what we are clicking on will run another function
   if (e.target.parentElement.classList.contains('remove-item')) {
     removeItem(e.target.parentElement.parentElement);
+  } else {
+    setItemToEdit(e.target);
   }
+}
+
+function checkIfItemExists(item) {
+  let itemsFromStorage = getItemsFromStorage();
+  return itemsFromStorage.includes(item);
+}
+
+function setItemToEdit(item) {
+  isEditMode = true;
+
+  itemList
+    .querySelectorAll('li')
+    .forEach((i) => i.classList.remove('edit-mode'));
+
+  item.classList.add('edit-mode');
+  formBtn.innerHTML = '<i class="fa-solid fa-pen"></i> Update Item';
+  formBtn.style.backgroundColor = '#228b22';
+  itemInput.value = item.textContent;
 }
 
 function removeItem(item) {
@@ -154,6 +190,7 @@ function filterItems(e) {
 
 //hide filter and clear all if there are no items to filter or clear
 function checkUI() {
+  itemInput.value = '';
   const items = itemList.querySelectorAll('li');
   if (items.length === 0) {
     // meaning there is nothing in the node list
@@ -163,6 +200,11 @@ function checkUI() {
     clearBtn.style.display = 'block';
     itemFilter.style.display = 'block';
   }
+
+  formBtn.innerHTML = '<i class"fa-solid fa-plus"></i> Add Item';
+  formBtn.style.backgroundColor = '#333';
+
+  isEditMode = false;
 }
 
 //init function -> initialize app
