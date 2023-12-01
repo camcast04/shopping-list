@@ -14,6 +14,7 @@ const itemForm = document.getElementById('item-form');
 const itemInput = document.getElementById('item-input');
 const itemList = document.getElementById('item-list');
 const clearBtn = document.getElementById('clear');
+const itemFilter = document.getElementById('filter');
 
 //functions
 function addItem(e) {
@@ -36,6 +37,9 @@ function addItem(e) {
   itemList.appendChild(li);
 
   itemInput.value = '';
+
+  //check the state
+  checkUI();
 }
 
 function createButton(classes) {
@@ -57,8 +61,12 @@ function removeItem(e) {
   //   console.log(e.target.parentElement.classList);
   if (e.target.parentElement.classList.contains('remove-item')) {
     // we only want this to fire off if we are clicking on the icon whose parent is a button with a class of remove item
-    e.target.parentElement.parentElement.remove();
+    if (confirm('Are you sure?')) {
+      e.target.parentElement.parentElement.remove();
+    }
   }
+  //check the state
+  checkUI();
 }
 
 //clear everything
@@ -66,11 +74,26 @@ function clearItems() {
   while (itemList.firstChild) {
     itemList.removeChild(itemList.firstChild);
   }
+
+  checkUI();
 }
 
 //hide filter and clear all if there are no items to filter or clear
-
+function checkUI() {
+  const items = itemList.querySelectorAll('li');
+  if (items.length === 0) {
+    // meaning there is nothing in the node list
+    clearBtn.style.display = 'none';
+    itemFilter.style.display = 'none';
+  } else {
+    clearBtn.style.display = 'block';
+    itemFilter.style.display = 'block';
+  }
+}
 //Event listeners
 itemForm.addEventListener('submit', addItem);
 itemList.addEventListener('click', removeItem);
 clearBtn.addEventListener('click', clearItems);
+
+// check the state
+checkUI();
