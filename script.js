@@ -13,6 +13,7 @@ Project Specs:
 const itemForm = document.getElementById('item-form');
 const itemInput = document.getElementById('item-input');
 const itemList = document.getElementById('item-list');
+const clearBtn = document.getElementById('clear');
 
 //functions
 function addItem(e) {
@@ -51,5 +52,25 @@ function createIcon(classes) {
   return icon;
 }
 
+function removeItem(e) {
+  // need to use event delegation
+  //   console.log(e.target.parentElement.classList);
+  if (e.target.parentElement.classList.contains('remove-item')) {
+    // we only want this to fire off if we are clicking on the icon whose parent is a button with a class of remove item
+    e.target.parentElement.parentElement.remove();
+  }
+}
+
+//clear everything
+function clearItems() {
+  while (itemList.firstChild) {
+    itemList.removeChild(itemList.firstChild);
+  }
+}
+
+//hide filter and clear all if there are no items to filter or clear
+
 //Event listeners
 itemForm.addEventListener('submit', addItem);
+itemList.addEventListener('click', removeItem);
+clearBtn.addEventListener('click', clearItems);
