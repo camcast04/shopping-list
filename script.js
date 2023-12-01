@@ -97,17 +97,33 @@ function getItemsFromStorage() {
   return itemsFromStorage;
 }
 
-function removeItem(e) {
-  // need to use event delegation
-  //   console.log(e.target.parentElement.classList);
+function onClickItem(e) {
   if (e.target.parentElement.classList.contains('remove-item')) {
-    // we only want this to fire off if we are clicking on the icon whose parent is a button with a class of remove item
-    if (confirm('Are you sure?')) {
-      e.target.parentElement.parentElement.remove();
-    }
+    removeItem(e.target.parentElement.parentElement);
   }
-  //check the state
-  checkUI();
+}
+
+function removeItem(item) {
+  if (confirm('Are you sure?')) {
+    //remove from dom
+    item.remove();
+
+    //remove from storage
+    removeItemFromStorage(item.textContent);
+
+    //check the state
+    checkUI();
+  }
+}
+
+function removeItemFromStorage(item) {
+  let itemsFromStorage = getItemsFromStorage();
+
+  //filter out item to remove\
+  itemsFromStorage = itemsFromStorage.filter((i) => i !== item);
+
+  //re-set to localstorage
+  localStorage.setItem('items', JSON.stringify(itemsFromStorage));
 }
 
 //clear everything
@@ -154,7 +170,7 @@ function checkUI() {
 function init() {
   //Event listeners
   itemForm.addEventListener('submit', onAddItemSubmit);
-  itemList.addEventListener('click', removeItem);
+  itemList.addEventListener('click', onClickItem);
   clearBtn.addEventListener('click', clearItems);
   itemFilter.addEventListener('input', filterItems);
   document.addEventListener('DOMContentLoaded', displayItems);
